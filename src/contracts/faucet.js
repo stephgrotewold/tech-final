@@ -1,4 +1,12 @@
-export const FAUCET_ADDRESS = "TU_DIRECCION_DEL_FAUCET";
-export const FAUCET_ABI = [
-  // Aquí irá el ABI de tu faucet
-];
+import React from 'react';
+
+const Faucet = () => {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold text-white mb-4">Get TECH Tokens</h1>
+      {/* Contenido del Faucet */}
+    </div>
+  );
+};
+
+export default Faucet;
