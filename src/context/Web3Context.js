@@ -1,44 +1,36 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import Web3 from 'web3';
-import { TOKEN_ABI, TOKEN_ADDRESS } from '../contracts/token';
 
-export const Web3Context = createContext();
+const Web3Context = createContext(null);
 
-export const Web3Provider = ({ children }) => {
-  const [web3, setWeb3] = useState(null);
+export function Web3Provider({ children }) {
   const [account, setAccount] = useState(null);
-  const [token, setToken] = useState(null);
+  const [web3, setWeb3] = useState(null);
 
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await window.ethereum.request({ 
+          method: 'eth_requestAccounts' 
+        });
         const web3Instance = new Web3(window.ethereum);
-        const accounts = await web3Instance.eth.getAccounts();
-        const tokenContract = new web3Instance.eth.Contract(TOKEN_ABI, TOKEN_ADDRESS);
-        
-        setWeb3(web3Instance);
         setAccount(accounts[0]);
-        setToken(tokenContract);
+        setWeb3(web3Instance);
       } catch (error) {
-        console.error('Error connecting to MetaMask', error);
+        console.error("User denied account access");
       }
     } else {
-      alert('Please install MetaMask!');
+      console.log('Please install MetaMask!');
     }
   };
 
-  useEffect(() => {
-    if (window.ethereum) {
-      window.ethereum.on('accountsChanged', (accounts) => {
-        setAccount(accounts[0]);
-      });
-    }
-  }, []);
-
   return (
-    <Web3Context.Provider value={{ web3, account, token, connectWallet }}>
+    <Web3Context.Provider value={{ account, web3, connectWallet }}>
       {children}
     </Web3Context.Provider>
   );
-};
+}
+
+export function useWeb3() {
+  return useContext(Web3Context);
+}
