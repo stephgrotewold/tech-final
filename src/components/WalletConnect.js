@@ -1,32 +1,32 @@
+// src/components/WalletConnect.js
 import React from 'react';
 import { useWeb3 } from '../context/Web3Context';
 
 function WalletConnect() {
-  const { account, balance, loading, connectWallet, disconnectWallet } = useWeb3();
+  const { account, balance, connectWallet, disconnectWallet } = useWeb3();
 
   return (
-    <div className="flex items-center space-x-4">
+    <div className="flex items-center gap-4">
       {!account ? (
         <button
           onClick={connectWallet}
-          disabled={loading}
-          className={`bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors ${
-            loading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
         >
-          {loading ? 'Connecting...' : 'Connect Wallet'}
+          Connect Wallet
         </button>
       ) : (
-        <div className="flex items-center space-x-4">
-          <span className="text-gray-200">
-            {account.slice(0, 6)}...{account.slice(-4)}
-          </span>
-          <span className="text-gray-200">
-            {balance} TECH
-          </span>
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col items-end">
+            <span className="text-gray-200 text-sm">
+              {account.slice(0, 6)}...{account.slice(-4)}
+            </span>
+            <span className="text-gray-300 text-xs">
+              {balance} TECH
+            </span>
+          </div>
           <button
             onClick={disconnectWallet}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
           >
             Disconnect
           </button>

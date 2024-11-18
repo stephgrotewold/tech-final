@@ -1,12 +1,12 @@
-import React from 'react';
-
-const Faucet = () => {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-white mb-4">Get TECH Tokens</h1>
-      {/* Contenido del Faucet */}
-    </div>
-  );
-};
-
-export default Faucet;
+// src/contracts/faucet.js
+export const FAUCET_ADDRESS = "0x668a659CC12a80925bEeC70729970B04Dc1a040F";
+export const FAUCET_ABI = [
+  // ... otros métodos del ABI
+  {
+    "inputs": [],
+    "name": "requestTokens",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+];
