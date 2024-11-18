@@ -16,14 +16,23 @@
 git clone https://github.com/stephgrotewold/tech-final.git
 cd TECH-FINAL
 ```
-
-#### 3. Instalar Dependencias
+#### 3. Agregar el TOKEN al Metamask
+1. Iniciar Sesion en MetaMask
+2. Hacer click en Tokens
+3. Luego ir a  `Import`
+4. Copiar la dirección de contrato y darle aceptar.
+```bash
+0x668a659CC12a80925bEeC70729970B04Dc1a040F
+```
+#### 4. Instalar Dependencias
+En la raiz del proyecto `tech-final`:
 ```bash
 npm install
 ```
-#### 4. Iniciar el Proyecto
+#### 5. Iniciar el Proyecto
+En la raiz del proyecto `tech-final`:
 ```bash
 npm start
 ```
-
+Asegurarse de probar el localhost en el browser que tenga el metamask instalado. 
 El proyecto debería estar corriendo en `http://localhost:3000`
