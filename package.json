@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@ethersproject/providers": "^5.7.2",
-    "@heroicons/react": "^2.1.5",
+    "@heroicons/react": "^2.2.0",
     "@metamask/detect-provider": "^2.0.0",
     "axios": "^1.6.2",
     "ethers": "^5.7.2",
