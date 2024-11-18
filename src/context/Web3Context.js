@@ -18,100 +18,160 @@ export const Web3Provider = ({ children }) => {
   const [contract, setContract] = useState(null);
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [provider, setProvider] = useState(null);
+
+  const initializeProvider = async () => {
+    if (window.ethereum) {
+      const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+      setProvider(web3Provider);
+      return web3Provider;
+    }
+    return null;
+  };
+
+  const initializeContract = async (userAddress, web3Provider) => {
+    try {
+      const signer = web3Provider.getSigner();
+      const tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
+      setContract(tokenContract);
+      
+      const balance = await tokenContract.balanceOf(userAddress);
+      setBalance(ethers.utils.formatUnits(balance, 18));
+    } catch (error) {
+      console.error("Error initializing contract:", error);
+      throw error;
+    }
+  };
 
   const connectWallet = async () => {
-    try {
-      setLoading(true);
-      if (window.ethereum) {
-        // Limpiar el estado anterior si existe
-        if (account) {
-          await disconnectWallet();
-        }
+    if (isConnecting) {
+      console.log('Connection already in progress');
+      return false;
+    }
 
-        const accounts = await window.ethereum.request({
+    if (!window.ethereum) {
+      alert('Please install MetaMask!');
+      return false;
+    }
+
+    try {
+      setIsConnecting(true);
+      setLoading(true);
+
+      const web3Provider = await initializeProvider();
+      if (!web3Provider) {
+        throw new Error('Failed to initialize provider');
+      }
+
+      // Primero verifica cuentas existentes
+      const accounts = await web3Provider.listAccounts();
+      
+      if (accounts.length > 0) {
+        setAccount(accounts[0]);
+        await initializeContract(accounts[0], web3Provider);
+        return true;
+      }
+
+      // Si no hay cuentas, solicita conexión
+      try {
+        const newAccounts = await window.ethereum.request({
           method: 'eth_requestAccounts'
         });
-        
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        const tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
-        
-        setAccount(accounts[0]);
-        setContract(tokenContract);
-        
-        const balance = await tokenContract.balanceOf(accounts[0]);
-        setBalance(ethers.utils.formatUnits(balance, 18));
 
-        // Cambiar a Sepolia si no está en esa red
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0xaa36a7' }], // Sepolia chainId
-          });
-        } catch (error) {
-          console.error("Error switching network:", error);
+        if (newAccounts.length > 0) {
+          setAccount(newAccounts[0]);
+          await initializeContract(newAccounts[0], web3Provider);
+          return true;
         }
-      }
-    } catch (error) {
-      console.error("Error connecting wallet:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const disconnectWallet = async () => {
-    try {
-      // Limpiar el estado
-      setAccount(null);
-      setContract(null);
-      setBalance(0);
-
-      // Remover los listeners de eventos
-      if (window.ethereum) {
-        window.ethereum.removeAllListeners('accountsChanged');
-        window.ethereum.removeAllListeners('chainChanged');
-      }
-
-      // Reinicializar los listeners después de la desconexión
-      initializeEthereumListeners();
-    } catch (error) {
-      console.error("Error disconnecting wallet:", error);
-    }
-  };
-
-  const initializeEthereumListeners = () => {
-    if (window.ethereum) {
-      window.ethereum.on('accountsChanged', (accounts) => {
-        if (accounts.length === 0) {
-          disconnectWallet();
+      } catch (error) {
+        if (error.code === -32002) {
+          alert('Please open MetaMask and accept the connection request');
         } else {
-          setAccount(accounts[0]);
-          updateBalance(accounts[0]);
+          console.error('Error connecting wallet:', error);
+          alert('Error connecting wallet. Please try again.');
         }
-      });
+        return false;
+      }
 
-      window.ethereum.on('chainChanged', () => {
-        window.location.reload();
-      });
-
-      window.ethereum.on('disconnect', () => {
-        disconnectWallet();
-      });
+    } catch (error) {
+      console.error('Error in connectWallet:', error);
+      return false;
+    } finally {
+      setIsConnecting(false);
+      setLoading(false);
     }
   };
 
   const updateBalance = async (address) => {
     if (contract && address) {
-      const balance = await contract.balanceOf(address);
-      setBalance(ethers.utils.formatUnits(balance, 18));
+      try {
+        const balance = await contract.balanceOf(address);
+        setBalance(ethers.utils.formatUnits(balance, 18));
+      } catch (error) {
+        console.error("Error updating balance:", error);
+      }
     }
   };
 
+  const disconnectWallet = () => {
+    setAccount(null);
+    setContract(null);
+    setBalance(0);
+    setIsConnecting(false);
+    setProvider(null);
+  };
+
   useEffect(() => {
-    initializeEthereumListeners();
+    const handleAccountsChanged = async (accounts) => {
+      if (accounts.length === 0) {
+        disconnectWallet();
+      } else {
+        const web3Provider = await initializeProvider();
+        setAccount(accounts[0]);
+        if (web3Provider) {
+          await initializeContract(accounts[0], web3Provider);
+        }
+      }
+    };
+
+    const handleChainChanged = () => {
+      window.location.reload();
+    };
+
+    const handleDisconnect = () => {
+      disconnectWallet();
+    };
+
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      window.ethereum.on('chainChanged', handleChainChanged);
+      window.ethereum.on('disconnect', handleDisconnect);
+
+      // Auto-connect if previously connected
+      const checkConnection = async () => {
+        try {
+          const web3Provider = await initializeProvider();
+          if (web3Provider) {
+            const accounts = await web3Provider.listAccounts();
+            if (accounts.length > 0) {
+              setAccount(accounts[0]);
+              await initializeContract(accounts[0], web3Provider);
+            }
+          }
+        } catch (error) {
+          console.error("Error checking connection:", error);
+        }
+      };
+
+      checkConnection();
+    }
+
     return () => {
       if (window.ethereum) {
-        window.ethereum.removeAllListeners();
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        window.ethereum.removeListener('chainChanged', handleChainChanged);
+        window.ethereum.removeListener('disconnect', handleDisconnect);
       }
     };
   }, []);
@@ -122,6 +182,7 @@ export const Web3Provider = ({ children }) => {
       contract,
       balance,
       loading,
+      provider,
       connectWallet,
       disconnectWallet,
       updateBalance

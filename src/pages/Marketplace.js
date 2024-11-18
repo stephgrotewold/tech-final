@@ -1,6 +1,13 @@
+// src/pages/Marketplace.js
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useWeb3 } from '../context/Web3Context';
 
 function Marketplace() {
+  const navigate = useNavigate();
+  const { account, connectWallet } = useWeb3();
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
   const [products] = useState([
     {
       id: 1,
@@ -28,17 +35,31 @@ function Marketplace() {
       image: "https://via.placeholder.com/300x200",
       seller: "0x9876...1234",
       category: "Phones"
-    },
-    // Puedes agregar más productos aquí
+    }
   ]);
-
-  const [selectedCategory, setSelectedCategory] = useState('All');
 
   const categories = ['All', 'Computers', 'Phones', 'Accessories'];
 
   const filteredProducts = selectedCategory === 'All' 
     ? products 
     : products.filter(product => product.category === selectedCategory);
+
+  const handleBuyClick = async (productId) => {
+    if (!account) {
+      try {
+        const success = await connectWallet();
+        if (success) {
+          navigate('/profile-select');
+        }
+      } catch (error) {
+        console.error('Connection error:', error);
+      }
+      return;
+    }
+    
+    // Aquí iría la lógica de compra cuando el usuario está conectado
+    console.log('Buying product:', productId);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -71,7 +92,7 @@ function Marketplace() {
       {/* Products Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProducts.map((product) => (
-          <div key={product.id} className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform">
+          <div key={product.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
             <img 
               src={product.image} 
               alt={product.name} 
@@ -90,10 +111,14 @@ function Marketplace() {
                   {product.price} TECH
                 </span>
                 <button 
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                  onClick={() => {/* Implementar lógica de compra */}}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    account 
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      : 'bg-blue-100 hover:bg-blue-200 text-blue-800'
+                  }`}
+                  onClick={() => handleBuyClick(product.id)}
                 >
-                  Buy Now
+                  {account ? 'Buy Now' : 'Connect to Buy'}
                 </button>
               </div>
               <div className="mt-4 text-sm text-gray-500">

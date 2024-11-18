@@ -1,37 +1,81 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Web3Provider } from './context/Web3Context';
+import { UserProvider } from './context/UserContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Marketplace from './pages/Marketplace';
 import Faucet from './pages/Faucet';
 import SellItems from './pages/SellItems';
-import Products from './pages/Products';
 import Profile from './pages/Profile';
+import UserTypeSelector from './components/UserTypeSelector';
+import { useWeb3 } from './context/Web3Context';
 
-// Import CSS
-import './index.css';
+// Componente para rutas protegidas que requieren wallet conectada
+const ProtectedRoute = ({ children }) => {
+  const { account } = useWeb3();
+  if (!account) {
+    return <Navigate to="/" />;
+  }
+  return children;
+};
+
+function AppContent() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-800">
+      <Navbar />
+      <div className="container mx-auto px-4 py-8">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route 
+            path="/profile-select" 
+            element={
+              <ProtectedRoute>
+                <UserTypeSelector />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/faucet" 
+            element={
+              <ProtectedRoute>
+                <Faucet />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/sell" 
+            element={
+              <ProtectedRoute>
+                <SellItems />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-800">
-      <Web3Provider>
-        <Router>
-          <Navbar />
-          <div className="container mx-auto px-4 py-8">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/marketplace" element={<Marketplace />} />
-              <Route path="/faucet" element={<Faucet />} />
-              <Route path="/sell" element={<SellItems />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/profile" element={<Profile />} />
-            </Routes>
-          </div>
-        </Router>
-      </Web3Provider>
-    </div>
+    <Web3Provider>
+      <Router>
+        <UserProvider>
+          <AppContent />
+        </UserProvider>
+      </Router>
+    </Web3Provider>
   );
 }
 
