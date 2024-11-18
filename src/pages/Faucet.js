@@ -1,9 +1,9 @@
+// src/pages/Faucet.js
 import React, { useState } from 'react';
 import { useWeb3 } from '../context/Web3Context';
 
 function Faucet() {
-  const { account } = useWeb3();
-  const [amount, setAmount] = useState('10');
+  const { account, balance, connectWallet, requestTokens } = useWeb3();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
@@ -13,17 +13,15 @@ function Faucet() {
     setMessage(null);
 
     try {
-      // Aquí irá la lógica de interacción con el smart contract
-      // Por ahora simulamos la transacción
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await requestTokens();
       setMessage({
         type: 'success',
-        text: `Successfully sent ${amount} TECH tokens to your wallet!`
+        text: 'Successfully received 10 TECH tokens!'
       });
     } catch (error) {
       setMessage({
         type: 'error',
-        text: 'Failed to send tokens. Please try again.'
+        text: error.message || 'Failed to request tokens. Please try again.'
       });
     } finally {
       setLoading(false);
@@ -48,40 +46,33 @@ function Faucet() {
             <p className="text-gray-600 mb-4">
               Please connect your wallet to request tokens
             </p>
-            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            <button 
+              onClick={connectWallet}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
               Connect Wallet
             </button>
           </div>
         ) : (
-          <form onSubmit={handleRequestTokens} className="space-y-6">
+          <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Amount of TECH Tokens
+                Your TECH Token Balance
               </label>
-              <div className="flex items-center space-x-4">
-                <select
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="10">10 TECH</option>
-                  <option value="20">20 TECH</option>
-                  <option value="50">50 TECH</option>
-                  <option value="100">100 TECH</option>
-                </select>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className={`px-6 py-2 rounded-lg text-white transition-colors ${
-                    loading
-                      ? 'bg-blue-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
-                >
-                  {loading ? 'Requesting...' : 'Request Tokens'}
-                </button>
-              </div>
+              <p className="text-lg font-medium">{balance} TECH</p>
             </div>
+
+            <button
+              onClick={handleRequestTokens}
+              disabled={loading}
+              className={`w-full px-6 py-2 rounded-lg text-white transition-colors ${
+                loading
+                  ? 'bg-blue-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
+            >
+              {loading ? 'Requesting...' : 'Get Free Tokens'}
+            </button>
 
             {message && (
               <div
@@ -99,17 +90,16 @@ function Faucet() {
               <h3 className="font-medium text-gray-700 mb-2">How it works:</h3>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Connect your MetaMask wallet</li>
-                <li>Select the amount of TECH tokens you want</li>
-                <li>Click "Request Tokens" to receive them</li>
+                <li>Click "Get Free Tokens" to receive 10 TECH tokens</li>
                 <li>Tokens will be sent to your connected wallet</li>
                 <li>You can request tokens once every 24 hours</li>
+                <li>Use these tokens to buy items in the marketplace</li>
               </ul>
             </div>
-          </form>
+          </div>
         )}
       </div>
 
-      {/* Transaction History */}
       {account && (
         <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-bold text-blue-900 mb-4">
@@ -125,7 +115,6 @@ function Faucet() {
               </div>
               <span className="text-green-600">Success</span>
             </div>
-            {/* Add more transaction history items here */}
           </div>
         </div>
       )}

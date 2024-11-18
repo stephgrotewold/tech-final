@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { Web3Context } from '../context/Web3Context';
+import { Web3Provider, useWeb3 } from '../context/Web3Context';
 
 function ProductCard({ product }) {
   const { account } = useContext(Web3Context);
