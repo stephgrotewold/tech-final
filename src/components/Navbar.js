@@ -43,7 +43,7 @@ function Navbar() {
           </Link>
           
           <div className="flex items-center space-x-8">
-            {/* Marketplace siempre visible */}
+            {/* Enlaces siempre visibles */}
             <Link 
               to="/marketplace" 
               className="text-white hover:text-blue-200 transition-colors"
@@ -51,7 +51,6 @@ function Navbar() {
               Marketplace
             </Link>
 
-            {/* Start Selling - redirige a connect wallet si no está conectado */}
             <button
               onClick={handleStartSelling}
               className="text-white hover:text-blue-200 transition-colors"
@@ -82,6 +81,27 @@ function Navbar() {
               </button>
             ) : (
               <div className="flex items-center space-x-4">
+                {/* Profile Link */}
+                <Link
+                  to="/profile"
+                  className="text-white hover:text-blue-200 transition-colors flex items-center space-x-2"
+                >
+                  <svg 
+                    className="w-5 h-5" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" 
+                    />
+                  </svg>
+                  <span>Profile</span>
+                </Link>
+
                 <div className="flex flex-col items-end">
                   <span className="text-white text-sm font-medium">
                     {account.slice(0, 6)}...{account.slice(-4)}
