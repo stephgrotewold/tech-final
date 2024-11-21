@@ -1,0 +1,6 @@
+node_modules
+# Ignorar todos los archivos .DS_Store
+.DS_Store
+
+# Ignorar el directorio ds_store si existe
+ds_store/
