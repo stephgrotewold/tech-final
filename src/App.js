@@ -11,13 +11,30 @@ import SellItems from './pages/SellItems';
 import Profile from './pages/Profile';
 import UserTypeSelector from './components/UserTypeSelector';
 import { useWeb3 } from './context/Web3Context';
+import { useUser } from './context/UserContext';
 
-// Componente para rutas protegidas que requieren wallet conectada
+// Componente para rutas que requieren wallet conectada
 const ProtectedRoute = ({ children }) => {
   const { account } = useWeb3();
   if (!account) {
     return <Navigate to="/" />;
   }
+  return children;
+};
+
+// Nuevo componente para rutas que requieren ser seller
+const SellerRoute = ({ children }) => {
+  const { account } = useWeb3();
+  const { userType } = useUser();
+  
+  if (!account) {
+    return <Navigate to="/" />;
+  }
+  
+  if (userType !== 'seller') {
+    return <Navigate to="/marketplace" />;
+  }
+  
   return children;
 };
 
@@ -48,9 +65,9 @@ function AppContent() {
           <Route 
             path="/sell" 
             element={
-              <ProtectedRoute>
+              <SellerRoute>
                 <SellItems />
-              </ProtectedRoute>
+              </SellerRoute>
             } 
           />
           <Route 

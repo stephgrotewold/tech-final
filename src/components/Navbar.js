@@ -29,6 +29,8 @@ function Navbar() {
   const handleStartSelling = () => {
     if (!account) {
       handleConnect();
+    } else if (userType !== 'seller') {
+      navigate('/profile-select');
     } else {
       navigate('/sell');
     }
@@ -51,12 +53,25 @@ function Navbar() {
               Marketplace
             </Link>
 
-            <button
-              onClick={handleStartSelling}
-              className="text-white hover:text-blue-200 transition-colors"
-            >
-              Start Selling
-            </button>
+            {/* Start Selling - solo visible para sellers */}
+            {userType === 'seller' && (
+              <button
+                onClick={handleStartSelling}
+                className="text-white hover:text-blue-200 transition-colors"
+              >
+                Start Selling
+              </button>
+            )}
+
+            {/* Get Tokens - solo visible para buyers */}
+            {userType === 'buyer' && (
+              <Link 
+                to="/faucet" 
+                className="text-white hover:text-blue-200 transition-colors"
+              >
+                Get Tokens
+              </Link>
+            )}
 
             {/* Wallet Connection */}
             {!account ? (
@@ -101,6 +116,13 @@ function Navbar() {
                   </svg>
                   <span>Profile</span>
                 </Link>
+
+                {/* User Type Badge */}
+                {userType && (
+                  <span className="bg-blue-700 text-white px-2 py-1 rounded-full text-sm">
+                    {userType.charAt(0).toUpperCase() + userType.slice(1)}
+                  </span>
+                )}
 
                 <div className="flex flex-col items-end">
                   <span className="text-white text-sm font-medium">
