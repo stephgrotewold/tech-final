@@ -60,6 +60,13 @@ npm start
 Asegurarse de probar el localhost en el browser que tenga el metamask instalado.
 El proyecto debería estar corriendo en `http://localhost:3000`
 
+
+### Host
+Se esta utilizando GitHub Pages:
+```bash
+https://stephgrotewold.github.io/tech-final/#/profile
+```
+
 # Database:
 
 #### 1. Ir a ruta donde esta database.py
