@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { TOKEN_ADDRESS, TOKEN_ABI } from '../contracts/token';
+import { MARKETPLACE_ADDRESS, MARKETPLACE_ABI } from '../contracts/marketplace';
 
 const Web3Context = createContext();
 
@@ -15,7 +16,10 @@ export const useWeb3 = () => {
 
 export const Web3Provider = ({ children }) => {
   const [account, setAccount] = useState(null);
-  const [contract, setContract] = useState(null);
+  const [contract, setContract] = useState({
+    token: null,
+    marketplace: null
+  });
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -33,13 +37,26 @@ export const Web3Provider = ({ children }) => {
   const initializeContract = async (userAddress, web3Provider) => {
     try {
       const signer = web3Provider.getSigner();
+      
+      // Inicializar el contrato del token
       const tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
-      setContract(tokenContract);
+      
+      // Inicializar el contrato del marketplace
+      const marketplaceContract = new ethers.Contract(
+        MARKETPLACE_ADDRESS,
+        MARKETPLACE_ABI,
+        signer
+      );
+
+      setContract({
+        token: tokenContract,
+        marketplace: marketplaceContract
+      });
       
       const balance = await tokenContract.balanceOf(userAddress);
       setBalance(ethers.utils.formatUnits(balance, 18));
     } catch (error) {
-      console.error("Error initializing contract:", error);
+      console.error("Error initializing contracts:", error);
       throw error;
     }
   };
@@ -104,9 +121,9 @@ export const Web3Provider = ({ children }) => {
   };
 
   const updateBalance = async (address) => {
-    if (contract && address) {
+    if (contract.token && address) {
       try {
-        const balance = await contract.balanceOf(address);
+        const balance = await contract.token.balanceOf(address);
         setBalance(ethers.utils.formatUnits(balance, 18));
       } catch (error) {
         console.error("Error updating balance:", error);
@@ -116,7 +133,10 @@ export const Web3Provider = ({ children }) => {
 
   const disconnectWallet = () => {
     setAccount(null);
-    setContract(null);
+    setContract({
+      token: null,
+      marketplace: null
+    });
     setBalance(0);
     setIsConnecting(false);
     setProvider(null);
