@@ -1,30 +1,29 @@
-// src/pages/Faucet.js
-import React, { useState } from 'react';
-import { useWeb3 } from '../context/Web3Context';
+import React, { useState } from "react";
+import { useWeb3 } from "../context/Web3Context";
+import { requestTokens } from "../contracts/faucet";
 
 function Faucet() {
-  const { account, balance, contract, updateBalance, connectWallet } = useWeb3();
+  const { provider, account, connectWallet } = useWeb3();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const requestTokens = async () => {
+  const handleRequestTokens = async () => {
+    if (!account) {
+      alert("Please connect your wallet first.");
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
     try {
-      setLoading(true);
-      setError('');
-      setSuccess('');
-
-      // Use the contract to request tokens
-      const tx = await contract.requestTokens();
-      await tx.wait();
-
-      // Update the balance
-      await updateBalance();
-
-      setSuccess('Successfully received tokens!');
+      await requestTokens(provider); // Llama al contrato
+      setSuccess("Successfully received tokens!");
     } catch (err) {
-      setError(err.message || 'Error requesting tokens');
-      console.error('Error:', err);
+      console.error("Error requesting tokens:", err);
+      setError("Failed to request tokens.");
     } finally {
       setLoading(false);
     }
@@ -34,7 +33,6 @@ function Faucet() {
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="bg-white rounded-xl shadow-lg p-6">
         <h1 className="text-2xl font-bold text-blue-900 mb-6">Get TECH Tokens</h1>
-
         <div className="bg-blue-50 rounded-lg p-4 mb-6">
           <p className="text-blue-800">
             Use this faucet to get TECH tokens for testing. These tokens can be used to
@@ -54,23 +52,14 @@ function Faucet() {
           </div>
         ) : (
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Your TECH Token Balance
-              </label>
-              <p className="text-lg font-medium">{balance} TECH</p>
-            </div>
-
             <button
-              onClick={requestTokens}
-              disabled={loading || !account}
+              onClick={handleRequestTokens}
+              disabled={loading}
               className={`w-full px-6 py-2 rounded-lg text-white transition-colors ${
-                loading || !account
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
+                loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
               }`}
             >
-              {loading ? 'Processing...' : 'Get Free Tokens'}
+              {loading ? "Processing..." : "Get Free Tokens"}
             </button>
 
             {error && (
@@ -84,17 +73,6 @@ function Faucet() {
                 {success}
               </div>
             )}
-
-            <div className="mt-6 text-sm text-gray-500">
-              <h3 className="font-medium text-gray-700 mb-2">How it works:</h3>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Connect your MetaMask wallet</li>
-                <li>Click "Get Free Tokens" to receive TECH tokens</li>
-                <li>Tokens will be sent to your connected wallet</li>
-                <li>You can request tokens once every 24 hours</li>
-                <li>Use these tokens to buy items in the marketplace</li>
-              </ul>
-            </div>
           </div>
         )}
       </div>
