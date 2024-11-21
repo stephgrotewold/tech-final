@@ -62,13 +62,30 @@ function Marketplace() {
       }
       return;
     }
-
+  
     try {
-      console.log('Buying product:', product);
-      
-      // Primero aprobar el gasto de tokens
+      // Verificar balances antes de la transacción
+      const sellerAddress = product.seller;
+      const buyerBalanceBefore = await contract.token.balanceOf(account);
+      const sellerBalanceBefore = await contract.token.balanceOf(sellerAddress);
+  
+      console.log('Transaction details:', {
+        itemId: product.id,
+        price: product.price,
+        seller: sellerAddress,
+        buyer: account
+      });
+  
+      console.log('Balances before transaction:', {
+        buyer: ethers.utils.formatUnits(buyerBalanceBefore, 18),
+        seller: ethers.utils.formatUnits(sellerBalanceBefore, 18)
+      });
+  
+      // Convertir el precio a wei
       const priceInWei = ethers.utils.parseUnits(product.price.toString(), 18);
+      console.log('Price in wei:', priceInWei.toString());
       
+      // Aprobar el gasto de tokens
       console.log('Approving tokens...');
       const approveTx = await contract.token.approve(
         MARKETPLACE_ADDRESS,
@@ -76,13 +93,37 @@ function Marketplace() {
       );
       await approveTx.wait();
       console.log('Tokens approved');
-
-      // Luego comprar el item
+  
+      // Comprar el item
       console.log('Buying item...');
       const buyTx = await contract.marketplace.buyItem(product.id);
       await buyTx.wait();
       console.log('Item bought');
-
+  
+      // Verificar balances después de la transacción
+      const buyerBalanceAfter = await contract.token.balanceOf(account);
+      const sellerBalanceAfter = await contract.token.balanceOf(sellerAddress);
+  
+      console.log('Balances after transaction:', {
+        buyer: ethers.utils.formatUnits(buyerBalanceAfter, 18),
+        seller: ethers.utils.formatUnits(sellerBalanceAfter, 18)
+      });
+  
+      console.log('Balance changes:', {
+        buyer: ethers.utils.formatUnits(buyerBalanceAfter.sub(buyerBalanceBefore), 18),
+        seller: ethers.utils.formatUnits(sellerBalanceAfter.sub(sellerBalanceBefore), 18)
+      });
+  
+      // Escuchar el evento ItemSold
+      contract.marketplace.on("ItemSold", (id, buyer, seller, price) => {
+        console.log('ItemSold event:', {
+          id: id.toString(),
+          buyer,
+          seller,
+          price: ethers.utils.formatUnits(price, 18)
+        });
+      });
+  
       // Actualizar el balance y recargar productos
       await updateBalance(account);
       await loadProducts();
@@ -90,7 +131,7 @@ function Marketplace() {
       alert('Purchase successful!');
     } catch (error) {
       console.error('Purchase error:', error);
-      alert('Error making purchase. Please try again.');
+      alert('Error making purchase: ' + error.message);
     }
   };
 
