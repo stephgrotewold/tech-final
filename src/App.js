@@ -87,7 +87,7 @@ function AppContent() {
 function App() {
   return (
     <Web3Provider>
-      <Router basename={process.env.PUBLIC_URL}>
+      <Router basename="/"> {/* Cambiado el basename a "/" */}
         <UserProvider>
           <AppContent />
         </UserProvider>
