@@ -1,0 +1,11 @@
+{
+  "files": {
+    "main.css": "/tech-final/static/css/main.bcfcfc0b.css",
+    "main.js": "/tech-final/static/js/main.bc804eb1.js",
+    "index.html": "/tech-final/index.html"
+  },
+  "entrypoints": [
+    "static/css/main.bcfcfc0b.css",
+    "static/js/main.bc804eb1.js"
+  ]
+}
