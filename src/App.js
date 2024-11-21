@@ -1,6 +1,6 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Web3Provider } from './context/Web3Context';
 import { UserProvider } from './context/UserContext';
 import Navbar from './components/Navbar';
@@ -22,7 +22,7 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// Nuevo componente para rutas que requieren ser seller
+// Componente para rutas que requieren ser seller
 const SellerRoute = ({ children }) => {
   const { account } = useWeb3();
   const { userType } = useUser();
@@ -87,7 +87,7 @@ function AppContent() {
 function App() {
   return (
     <Web3Provider>
-      <Router>
+      <Router basename={process.env.PUBLIC_URL}>
         <UserProvider>
           <AppContent />
         </UserProvider>

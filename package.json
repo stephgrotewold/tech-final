@@ -2,6 +2,7 @@
   "name": "tech-final",
   "version": "1.0.0",
   "private": true,
+  "homepage": "https://[tu-usuario-github].github.io/[nombre-repo]",
   "dependencies": {
     "@ethersproject/providers": "^5.7.2",
     "@heroicons/react": "^2.2.0",
@@ -16,13 +17,22 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "gh-pages": "^6.1.0",
     "tailwindcss": "^3.3.5"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
     "production": [
